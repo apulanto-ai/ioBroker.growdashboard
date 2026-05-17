@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowDashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #374151;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        h1 .dot.online { background: #4ade80; box-shadow: 0 0 8px #4ade80; }
+
+        /* Section headers */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+            margin-bottom: 12px;
+            margin-top: 28px;
+        }
+
+        /* Card grid */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover { border-color: #30363d; }
+
+        .card.warning { border-color: #f59e0b; }
+        .card.danger  { border-color: #ef4444; }
+        .card.ok      { border-color: #22c55e; }
+
+        .card-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #e6edf3;
+        }
+
+        .card-unit {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        .card-sub {
+            font-size: 0.78rem;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* VPD zone indicator */
+        .vpd-zone {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
+
+        .vpd-zone.low      { background: #1e3a5f; color: #60a5fa; }
+        .vpd-zone.prop     { background: #14532d; color: #86efac; }
+        .vpd-zone.veg      { background: #166534; color: #4ade80; }
+        .vpd-zone.flower   { background: #365314; color: #bef264; }
+        .vpd-zone.high     { background: #7f1d1d; color: #fca5a5; }
+
+        /* Fan control */
+        .fan-control {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .fan-control-header {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 16px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slider-row input[type=range] {
+            -webkit-appearance: none;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #21262d;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider-row input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ade80;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+        }
+
+        .slider-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #4ade80;
+            min-width: 52px;
+            text-align: right;
+        }
+
+        .btn-set {
+            background: #166534;
+            color: #4ade80;
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 14px;
+        }
+
+        .btn-set:hover { background: #14532d; }
+        .btn-set:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* No config notice */
+        .notice {
+            background: #1c2333;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 16px 20px;
+            color: #8b949e;
+            font-size: 0.88rem;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>
+    <span class="dot" id="statusDot"></span>
+    GrowDashboard &mdash; Lüftung
+</h1>
+
+<div id="noConfig" class="notice" style="display:none">
+    Keine Sensoren konfiguriert. Bitte unter <strong>Instanz-Einstellungen → Lüftung</strong> die State-IDs eintragen.
+</div>
+
+<div id="dashboard">
+    <div class="section-title">Messwerte</div>
+    <div class="cards">
+        <div class="card" id="cardTemp">
+            <div class="card-label">Temperatur</div>
+            <div class="card-value">—<span class="card-unit">°C</span></div>
+            <div class="card-sub" id="tempStatus"></div>
+        </div>
+        <div class="card" id="cardHum">
+            <div class="card-label">Luftfeuchtigkeit</div>
+            <div class="card-value">—<span class="card-unit">%</span></div>
+            <div class="card-sub" id="humStatus"></div>
+        </div>
+        <div class="card" id="cardVpd">
+            <div class="card-label">VPD</div>
+            <div class="card-value">—<span class="card-unit">kPa</span></div>
+            <div id="vpdZone"></div>
+        </div>
+        <div class="card" id="cardFan">
+            <div class="card-label">Lüfter (Istwert)</div>
+            <div class="card-value">—<span class="card-unit">%</span></div>
+        </div>
+    </div>
+
+    <div id="fanControlSection" style="display:none">
+        <div class="section-title" style="margin-top:28px">Lüftersteuerung</div>
+        <div class="fan-control">
+            <div class="fan-control-header">Sollwert setzen</div>
+            <div class="slider-row">
+                <input type="range" id="fanSlider" min="0" max="100" value="0" step="1">
+                <span class="slider-value"><span id="fanSliderVal">0</span>%</span>
+            </div>
+            <button class="btn-set" id="btnSetFan">Setzen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── State ──────────────────────────────────────────────
+    const state = { temp: null, hum: null, fanRead: null };
+    let cfg = {};
+    let socket = null;
+
+    // ── VPD ───────────────────────────────────────────────
+    function calcVPD(tempC, rh) {
+        const svp = 0.6108 * Math.exp(17.27 * tempC / (tempC + 237.3));
+        return svp * (1 - rh / 100);
+    }
+
+    function vpdZone(vpd) {
+        if (vpd < 0.4)  return { label: '< 0.4 – Zu feucht',    cls: 'low' };
+        if (vpd < 0.8)  return { label: '0.4–0.8 – Stecklinge', cls: 'prop' };
+        if (vpd < 1.2)  return { label: '0.8–1.2 – Wachstum',   cls: 'veg' };
+        if (vpd < 1.6)  return { label: '1.2–1.6 – Blüte',      cls: 'flower' };
+        return              { label: '> 1.6 – Zu trocken',   cls: 'high' };
+    }
+
+    // ── Rendering ─────────────────────────────────────────
+    function setCardValue(cardId, val, decimals) {
+        const card = document.getElementById(cardId);
+        const valueEl = card.querySelector('.card-value');
+        const unit = valueEl.querySelector('.card-unit');
+        const unitText = unit ? unit.outerHTML : '';
+        valueEl.innerHTML = (val !== null ? val.toFixed(decimals) : '—') + unitText;
+    }
+
+    function setCardStatus(elId, text, cls) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        el.textContent = text;
+        el.style.color = { ok: '#4ade80', warn: '#f59e0b', err: '#ef4444' }[cls] || '#6b7280';
+    }
+
+    function renderTemp(val) {
+        setCardValue('cardTemp', val, 1);
+        const card = document.getElementById('cardTemp');
+        if (val === null) { card.className = 'card'; setCardStatus('tempStatus', '', ''); return; }
+        const min = cfg.ventTempMin ?? 18, max = cfg.ventTempMax ?? 28;
+        if (val < min)       { card.className = 'card warning'; setCardStatus('tempStatus', `Zu kalt (Min ${min}°C)`, 'warn'); }
+        else if (val > max)  { card.className = 'card danger';  setCardStatus('tempStatus', `Zu warm (Max ${max}°C)`, 'err'); }
+        else                 { card.className = 'card ok';      setCardStatus('tempStatus', 'Im Bereich', 'ok'); }
+    }
+
+    function renderHum(val) {
+        setCardValue('cardHum', val, 1);
+        const card = document.getElementById('cardHum');
+        if (val === null) { card.className = 'card'; setCardStatus('humStatus', '', ''); return; }
+        const min = cfg.ventHumMin ?? 50, max = cfg.ventHumMax ?? 70;
+        if (val < min)       { card.className = 'card warning'; setCardStatus('humStatus', `Zu trocken (Min ${min}%)`, 'warn'); }
+        else if (val > max)  { card.className = 'card danger';  setCardStatus('humStatus', `Zu feucht (Max ${max}%)`, 'err'); }
+        else                 { card.className = 'card ok';      setCardStatus('humStatus', 'Im Bereich', 'ok'); }
+    }
+
+    function renderVpd() {
+        const card = document.getElementById('cardVpd');
+        const zoneEl = document.getElementById('vpdZone');
+        if (state.temp === null || state.hum === null) {
+            setCardValue('cardVpd', null, 2);
+            zoneEl.innerHTML = '';
+            return;
+        }
+        const vpd = calcVPD(state.temp, state.hum);
+        setCardValue('cardVpd', vpd, 2);
+        const z = vpdZone(vpd);
+        zoneEl.innerHTML = `<span class="vpd-zone ${z.cls}">${z.label}</span>`;
+    }
+
+    function renderFanRead(val) {
+        setCardValue('cardFan', val, 0);
+    }
+
+    // ── State change handler ───────────────────────────────
+    function onStateChange(id, s) {
+        if (!s || s.val === undefined) return;
+        const val = s.val;
+
+        if (id === cfg.ventTempId)    { state.temp = val; renderTemp(val); renderVpd(); }
+        else if (id === cfg.ventHumId)  { state.hum  = val; renderHum(val);  renderVpd(); }
+        else if (id === cfg.ventFanReadId) { state.fanRead = val; renderFanRead(val); }
+    }
+
+    // ── Fan control ───────────────────────────────────────
+    function initFanControl() {
+        const section = document.getElementById('fanControlSection');
+        if (!cfg.ventFanWriteId) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+
+        const slider = document.getElementById('fanSlider');
+        const valEl  = document.getElementById('fanSliderVal');
+        const btn    = document.getElementById('btnSetFan');
+
+        slider.addEventListener('input', () => { valEl.textContent = slider.value; });
+
+        btn.addEventListener('click', () => {
+            if (!socket || !cfg.ventFanWriteId) return;
+            const setVal = parseInt(slider.value, 10);
+            btn.disabled = true;
+            socket.emit('setState', cfg.ventFanWriteId, { val: setVal, ack: false }, () => {
+                btn.disabled = false;
+            });
+        });
+    }
+
+    // ── Init ──────────────────────────────────────────────
+    function init(sock, instance) {
+        socket = sock;
+
+        sock.emit('getObject', `system.adapter.${instance}`, (err, obj) => {
+            if (err || !obj) return;
+            cfg = obj.native || {};
+
+            const hasAnySensor = cfg.ventTempId || cfg.ventHumId || cfg.ventFanReadId;
+            document.getElementById('noConfig').style.display = hasAnySensor ? 'none' : 'block';
+            document.getElementById('dashboard').style.display = hasAnySensor ? 'block' : 'none';
+
+            if (!hasAnySensor) return;
+
+            // Subscribe to configured states
+            const ids = [cfg.ventTempId, cfg.ventHumId, cfg.ventFanReadId].filter(Boolean);
+            ids.forEach(id => sock.emit('subscribe', id));
+
+            // Get current values immediately
+            ids.forEach(id => {
+                sock.emit('getState', id, (e, s) => { if (!e && s) onStateChange(id, s); });
+            });
+
+            initFanControl();
+
+            // Connection indicator
+            sock.emit('getState', `system.adapter.${instance}.alive`, (e, s) => {
+                if (!e && s && s.val) {
+                    document.getElementById('statusDot').className = 'dot online';
+                }
+            });
+        });
+
+        sock.on('stateChange', onStateChange);
+    }
+
+    // ── Entry point ───────────────────────────────────────
+    function waitForSocket(attempt) {
+        const sock = window.parent && window.parent.socket;
+        if (sock && sock.emit) {
+            const params = new URLSearchParams(window.location.search);
+            const instance = params.get('instance') || 'growdashboard.0';
+            init(sock, instance);
+        } else if (attempt < 20) {
+            setTimeout(() => waitForSocket(attempt + 1), 300);
+        }
+    }
+
+    waitForSocket(0);
+})();
+</script>
+</body>
+</html>

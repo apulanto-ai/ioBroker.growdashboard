@@ -3,7 +3,7 @@
   "items": {
     "tab_general": {
       "type": "tab",
-      "label": "General",
+      "label": "Allgemein",
       "items": {
         "grafanaUrl": {
           "type": "text",
@@ -20,41 +20,92 @@
         }
       }
     },
-    "tab_rooms": {
+    "tab_ventilation": {
       "type": "tab",
-      "label": "Grow Rooms",
+      "label": "Lüftung",
       "items": {
-        "rooms": {
-          "type": "table",
-          "label": "Rooms",
-          "items": {
-            "name": {
-              "type": "text",
-              "label": "Room Name",
-              "width": "20%"
-            },
-            "tempId": {
-              "type": "text",
-              "label": "Temperature State ID",
-              "width": "25%"
-            },
-            "humId": {
-              "type": "text",
-              "label": "Humidity State ID",
-              "width": "25%"
-            },
-            "co2Id": {
-              "type": "text",
-              "label": "CO2 State ID",
-              "width": "25%"
-            },
-            "enabled": {
-              "type": "checkbox",
-              "label": "Active",
-              "width": "5%",
-              "default": true
-            }
+        "_header_sensors": {
+          "type": "header",
+          "text": "Sensoren (Eingang)",
+          "size": 5
+        },
+        "ventTempId": {
+          "type": "objectId",
+          "label": "Temperatur-State",
+          "sm": 12,
+          "md": 4,
+          "filter": {
+            "type": "state",
+            "common": { "type": "number" }
           }
+        },
+        "ventHumId": {
+          "type": "objectId",
+          "label": "Luftfeuchtigkeit-State",
+          "sm": 12,
+          "md": 4,
+          "filter": {
+            "type": "state",
+            "common": { "type": "number" }
+          }
+        },
+        "ventFanReadId": {
+          "type": "objectId",
+          "label": "Lüftergeschwindigkeit (Istwert)",
+          "sm": 12,
+          "md": 4,
+          "filter": {
+            "type": "state",
+            "common": { "type": "number" }
+          }
+        },
+        "_header_control": {
+          "type": "header",
+          "text": "Steuerung (Ausgang)",
+          "size": 5
+        },
+        "ventFanWriteId": {
+          "type": "objectId",
+          "label": "Lüftersteuerung (Sollwert schreiben)",
+          "sm": 12,
+          "md": 6,
+          "filter": {
+            "type": "state",
+            "common": { "type": "number" }
+          }
+        },
+        "_header_thresholds": {
+          "type": "header",
+          "text": "Schwellenwerte",
+          "size": 5
+        },
+        "ventTempMin": {
+          "type": "number",
+          "label": "Temperatur Min (°C)",
+          "sm": 12,
+          "md": 3,
+          "default": 18
+        },
+        "ventTempMax": {
+          "type": "number",
+          "label": "Temperatur Max (°C)",
+          "sm": 12,
+          "md": 3,
+          "default": 28
+        },
+        "ventHumMin": {
+          "type": "number",
+          "label": "Luftfeuchtigkeit Min (%)",
+          "sm": 12,
+          "md": 3,
+          "default": 50
+        },
+        "ventHumMax": {
+          "type": "number",
+          "label": "Luftfeuchtigkeit Max (%)",
+          "sm": 12,
+          "md": 3,
+          "default": 70
         }
       }
     }
