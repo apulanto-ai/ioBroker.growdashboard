@@ -1,6 +1,6 @@
 ﻿{
   "name": "iobroker.growdashboard",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "ioBroker adapter for plant grow computer — monitors and visualizes sensor data from Grafana and ioBroker objects",
   "author": {
     "name": "apulanto",
@@ -22,8 +22,8 @@
   "files": [
     "main.js",
     "io-package.json",
-    "admin/index.html",
-    "admin/jsonConfig.json"
+    "admin/",
+    "www/"
   ],
   "engines": {
     "node": ">=18"
