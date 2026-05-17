@@ -1,8 +1,12 @@
 ﻿{
   "common": {
     "name": "growdashboard",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "news": {
+      "0.1.10": {
+        "en": "Version 0.1.10",
+        "de": "Version 0.1.10"
+      },
       "0.1.9": {
         "en": "Version 0.1.9",
         "de": "Version 0.1.9"

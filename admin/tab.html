@@ -2,76 +2,460 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrowDashboard</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0d1117;
+            --surface:   #161b22;
+            --border:    #21262d;
+            --border-ho: #30363d;
+            --text:      #e6edf3;
+            --muted:     #6b7280;
+            --green:     #4ade80;
+            --green-dim: #166534;
+            --yellow:    #f59e0b;
+            --red:       #ef4444;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 40px;
+            gap: 12px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
         }
-        .card {
-            background: #161b22;
-            border: 1px solid #21262d;
-            border-radius: 16px;
-            padding: 40px 48px;
-            text-align: center;
-            max-width: 480px;
-            width: 100%;
+
+        .header-title { font-size: 1.1rem; font-weight: 700; color: var(--green); flex: 1; }
+
+        .conn-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 12px;
         }
-        .icon { margin-bottom: 20px; }
-        h2 { font-size: 1.4rem; color: #4ade80; margin-bottom: 8px; }
-        p  { color: #6b7280; font-size: 0.9rem; line-height: 1.6; margin-bottom: 28px; }
-        .btn {
-            display: inline-block;
-            background: #166534;
-            color: #4ade80;
-            border: 1px solid #22c55e;
-            border-radius: 10px;
-            padding: 12px 32px;
-            font-size: 0.95rem;
+
+        .conn-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--border-ho);
+            transition: background 0.4s, box-shadow 0.4s;
+        }
+        .conn-dot.on { background: var(--green); box-shadow: 0 0 7px var(--green); }
+
+        main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+        .section-title {
+            font-size: 0.72rem;
             font-weight: 600;
-            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--muted);
+            margin-bottom: 12px;
+            margin-top: 28px;
+        }
+        .section-title:first-child { margin-top: 0; }
+
+        /* ── Cards ── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px 14px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent, var(--border));
+            border-radius: 12px 12px 0 0;
+        }
+
+        .card.ok     { --accent: var(--green); border-color: #22c55e33; }
+        .card.warn   { --accent: var(--yellow); border-color: #f59e0b33; }
+        .card.danger { --accent: var(--red);   border-color: #ef444433; }
+
+        .card-label {
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-value {
+            font-size: 1.9rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text);
+        }
+
+        .card-unit { font-size: 0.85rem; font-weight: 400; color: var(--muted); margin-left: 2px; }
+
+        .card-sub  { font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
+
+        .vpd-pill {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 20px;
+            margin-top: 6px;
+        }
+        .vpd-low    { background:#1e3a5f; color:#93c5fd; }
+        .vpd-prop   { background:#14532d; color:#86efac; }
+        .vpd-veg    { background:#166534; color:#4ade80; }
+        .vpd-flower { background:#365314; color:#bef264; }
+        .vpd-high   { background:#7f1d1d; color:#fca5a5; }
+
+        /* ── Fan control ── */
+        .fan-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .fan-bar-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+        .fan-slider {
+            -webkit-appearance: none;
+            flex: 1;
+            min-width: 120px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
             cursor: pointer;
+        }
+        .fan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--green);
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(74,222,128,.5);
+        }
+
+        .fan-val { font-size: 1.2rem; font-weight: 700; color: var(--green); min-width: 46px; text-align: right; }
+
+        .btn-set {
+            background: var(--green-dim);
+            color: var(--green);
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
             transition: background 0.2s;
         }
-        .btn:hover { background: #14532d; }
-        .hint { margin-top: 16px; font-size: 0.75rem; color: #374151; }
+        .btn-set:hover    { background: #14532d; }
+        .btn-set:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Grafana ── */
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+            gap: 14px;
+        }
+
+        .panel-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            padding: 10px 16px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-wrap iframe { display: block; width: 100%; border: none; background: #0d1117; }
+
+        .notice {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a10 10 0 0 1 10 10c0 5-4 9-9 10C7 21 2 16 2 12A10 10 0 0 1 12 2z"/>
-            <path d="M12 12c0-4 2-7 5-9"/>
-            <path d="M12 12c0-4-2-7-5-9"/>
-            <path d="M12 12v9"/>
-        </svg>
+
+<header>
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a10 10 0 0 1 10 10c0 5-4 9-9 10C7 21 2 16 2 12A10 10 0 0 1 12 2z"/>
+        <path d="M12 12c0-4 2-7 5-9"/><path d="M12 12c0-4-2-7-5-9"/><path d="M12 12v9"/>
+    </svg>
+    <div class="header-title">GrowDashboard</div>
+    <div class="conn-badge">
+        <div class="conn-dot" id="connDot"></div>
+        <span id="connText">Verbinde...</span>
     </div>
-    <h2>GrowDashboard</h2>
-    <p>Das vollstaendige Dashboard laeuft als eigenstaendige Webseite ueber den ioBroker Web-Adapter.</p>
-    <a class="btn" id="dashLink" href="#" target="_blank">Dashboard oeffnen</a>
-    <div class="hint" id="hintText">Ermittle URL...</div>
-</div>
+</header>
+
+<main>
+    <div id="ventSection" style="display:none">
+        <div class="section-title">Lueftung &amp; Klima</div>
+        <div class="card-grid" id="ventGrid"></div>
+        <div id="fanControlWrap" style="display:none">
+            <div class="fan-bar">
+                <span class="fan-bar-label">Luefter Sollwert</span>
+                <input type="range" class="fan-slider" id="fanSlider" min="0" max="100" value="0" step="1">
+                <span class="fan-val"><span id="fanSliderVal">0</span>%</span>
+                <button class="btn-set" id="btnSetFan">Setzen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tilesSection" style="display:none">
+        <div class="section-title">Datenpunkte</div>
+        <div class="card-grid" id="tileGrid"></div>
+    </div>
+
+    <div id="grafanaSection" style="display:none">
+        <div class="section-title">Grafana</div>
+        <div class="panel-grid" id="panelGrid"></div>
+    </div>
+
+    <div id="emptyNotice" class="notice" style="display:none">
+        Noch keine Datenpunkte konfiguriert. Bitte in den Instanz-Einstellungen State-IDs und Kacheln eintragen.
+    </div>
+</main>
 
 <script>
 (function () {
-    // Derive web adapter URL from current admin origin
-    const match = window.location.pathname.match(/\/(growdashboard\.\d+)\//);
-    const instance = (match && match[1]) || 'growdashboard.0';
+'use strict';
 
-    // Admin is typically on :8081, web adapter on :8082
-    const webPort = 8082;
-    const url = `${window.location.protocol}//${window.location.hostname}:${webPort}/${instance}/`;
+function calcVPD(t, rh) {
+    return +( 0.6108 * Math.exp(17.27 * t / (t + 237.3)) * (1 - rh / 100) ).toFixed(2);
+}
 
-    document.getElementById('dashLink').href = url;
-    document.getElementById('hintText').textContent = url;
+function vpdZone(v) {
+    if (v < 0.4) return { label: '< 0.4 Zu feucht',    cls: 'vpd-low' };
+    if (v < 0.8) return { label: '0.4-0.8 Stecklinge', cls: 'vpd-prop' };
+    if (v < 1.2) return { label: '0.8-1.2 Wachstum',   cls: 'vpd-veg' };
+    if (v < 1.6) return { label: '1.2-1.6 Bluete',     cls: 'vpd-flower' };
+    return             { label: '> 1.6 Zu trocken',  cls: 'vpd-high' };
+}
+
+function fmt(val, dec) {
+    return (val !== null && val !== undefined) ? (+val).toFixed(dec ?? 1) : '—';
+}
+
+var socket, cfg = {};
+var ventState = { temp: null, hum: null };
+var tileState = {};
+
+// ── Vent cards ────────────────────────────────────────────
+function buildVentGrid() {
+    var hasSensor = cfg.ventTempId || cfg.ventHumId || cfg.ventFanReadId;
+    if (!hasSensor) return;
+    document.getElementById('ventSection').style.display = 'block';
+
+    var defs = [
+        { key:'temp', label:'Temperatur',        unit:'°C',  dec:1 },
+        { key:'hum',  label:'Luftfeuchtigkeit',  unit:'%',   dec:1 },
+        { key:'vpd',  label:'VPD',               unit:'kPa', dec:2 },
+        { key:'fan',  label:'Luefter (Ist)',      unit:'%',   dec:0 },
+    ];
+    if (!cfg.ventFanReadId) defs = defs.filter(function(d){ return d.key !== 'fan'; });
+
+    var grid = document.getElementById('ventGrid');
+    defs.forEach(function(d) {
+        var c = document.createElement('div');
+        c.className = 'card';
+        c.id = 'vc-' + d.key;
+        c.innerHTML = '<div class="card-label">' + d.label + '</div>' +
+            '<div class="card-value" id="vv-' + d.key + '">—<span class="card-unit">' + d.unit + '</span></div>' +
+            '<div id="ve-' + d.key + '"></div>';
+        grid.appendChild(c);
+    });
+}
+
+function setCard(key, val, dec, unit, thMin, thMax) {
+    var el = document.getElementById('vv-' + key);
+    if (!el) return;
+    el.innerHTML = fmt(val, dec) + '<span class="card-unit">' + unit + '</span>';
+    var card = document.getElementById('vc-' + key);
+    if (card && val !== null && thMin !== undefined) {
+        card.className = val < thMin ? 'card warn' : val > thMax ? 'card danger' : 'card ok';
+    }
+}
+
+function updateVPD() {
+    if (ventState.temp === null || ventState.hum === null) return;
+    var vpd = calcVPD(ventState.temp, ventState.hum);
+    setCard('vpd', vpd, 2, 'kPa');
+    var z = vpdZone(vpd);
+    var el = document.getElementById('ve-vpd');
+    if (el) el.innerHTML = '<span class="vpd-pill ' + z.cls + '">' + z.label + '</span>';
+}
+
+// ── Tiles ─────────────────────────────────────────────────
+function buildTiles() {
+    var tiles = (cfg.dashboardTiles || []).filter(function(t){ return t.enabled !== false && t.stateId; });
+    if (!tiles.length) return;
+    document.getElementById('tilesSection').style.display = 'block';
+    var grid = document.getElementById('tileGrid');
+    tiles.forEach(function(t, i) {
+        tileState[t.stateId] = { cfg: t, idx: i };
+        var c = document.createElement('div');
+        c.className = 'card';
+        c.id = 'tc-' + i;
+        c.innerHTML = '<div class="card-label">' + (t.label || t.stateId) + '</div>' +
+            '<div class="card-value" id="tv-' + i + '">—<span class="card-unit">' + (t.unit||'') + '</span></div>';
+        grid.appendChild(c);
+        socket.emit('subscribe', t.stateId);
+        socket.emit('getState', t.stateId, function(e, s){ if (!e && s) onTile(t.stateId, s); });
+    });
+}
+
+function onTile(id, s) {
+    var entry = tileState[id];
+    if (!entry || !s) return;
+    var el = document.getElementById('tv-' + entry.idx);
+    if (el) el.innerHTML = fmt(s.val, entry.cfg.decimals ?? 1) +
+        '<span class="card-unit">' + (entry.cfg.unit||'') + '</span>';
+}
+
+// ── Grafana ───────────────────────────────────────────────
+function buildPanels() {
+    var panels = (cfg.grafanaPanels || []).filter(function(p){ return p.enabled !== false && p.url; });
+    if (!panels.length) return;
+    document.getElementById('grafanaSection').style.display = 'block';
+    var grid = document.getElementById('panelGrid');
+    panels.forEach(function(p) {
+        var w = document.createElement('div');
+        w.className = 'panel-wrap';
+        w.innerHTML = '<div class="panel-title">' + (p.title||'Panel') + '</div>' +
+            '<iframe src="' + p.url + '" height="' + (p.height||300) + '" loading="lazy"></iframe>';
+        grid.appendChild(w);
+    });
+}
+
+// ── Fan control ───────────────────────────────────────────
+function initFan() {
+    if (!cfg.ventFanWriteId) return;
+    document.getElementById('fanControlWrap').style.display = 'block';
+    var slider = document.getElementById('fanSlider');
+    var valEl  = document.getElementById('fanSliderVal');
+    var btn    = document.getElementById('btnSetFan');
+    slider.addEventListener('input', function(){ valEl.textContent = slider.value; });
+    btn.addEventListener('click', function() {
+        btn.disabled = true;
+        socket.emit('setState', cfg.ventFanWriteId, { val: +slider.value, ack: false }, function(){ btn.disabled = false; });
+    });
+}
+
+// ── State changes ─────────────────────────────────────────
+function onStateChange(id, s) {
+    if (!s) return;
+    if (id === cfg.ventTempId) {
+        ventState.temp = s.val;
+        setCard('temp', s.val, 1, '°C', cfg.ventTempMin, cfg.ventTempMax);
+        updateVPD();
+    } else if (id === cfg.ventHumId) {
+        ventState.hum = s.val;
+        setCard('hum', s.val, 1, '%', cfg.ventHumMin, cfg.ventHumMax);
+        updateVPD();
+    } else if (id === cfg.ventFanReadId) {
+        setCard('fan', s.val, 0, '%');
+    }
+    if (tileState[id]) onTile(id, s);
+}
+
+// ── Bootstrap ─────────────────────────────────────────────
+function start(sock, instance) {
+    socket = sock;
+
+    sock.emit('getObject', 'system.adapter.' + instance, function(err, obj) {
+        if (err || !obj) return;
+        cfg = obj.native || {};
+
+        buildVentGrid();
+        [cfg.ventTempId, cfg.ventHumId, cfg.ventFanReadId].filter(Boolean).forEach(function(id) {
+            sock.emit('subscribe', id);
+            sock.emit('getState', id, function(e, s){ if (!e && s) onStateChange(id, s); });
+        });
+
+        buildTiles();
+        buildPanels();
+        initFan();
+
+        var hasSomething = cfg.ventTempId || cfg.ventHumId ||
+            (cfg.dashboardTiles||[]).some(function(t){ return t.stateId; }) ||
+            (cfg.grafanaPanels||[]).some(function(p){ return p.url; });
+        document.getElementById('emptyNotice').style.display = hasSomething ? 'none' : 'block';
+    });
+
+    sock.on('stateChange', onStateChange);
+}
+
+// ── Wait for parent socket ────────────────────────────────
+function getInstance() {
+    var m = window.location.search.match(/[?&]instance=([^&]+)/);
+    if (m) return decodeURIComponent(m[1]);
+    m = window.location.pathname.match(/(growdashboard\.\d+)/);
+    return m ? m[1] : 'growdashboard.0';
+}
+
+function waitForSocket(n) {
+    var sock = window.parent && window.parent.socket;
+    if (sock && typeof sock.emit === 'function') {
+        document.getElementById('connDot').className = 'conn-dot on';
+        document.getElementById('connText').textContent = 'Verbunden';
+        start(sock, getInstance());
+    } else if (n < 30) {
+        setTimeout(function(){ waitForSocket(n + 1); }, 300);
+    } else {
+        document.getElementById('connText').textContent = 'Keine Verbindung';
+    }
+}
+
+waitForSocket(0);
 })();
 </script>
 </body>
