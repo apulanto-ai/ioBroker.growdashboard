@@ -1,8 +1,12 @@
 ﻿{
   "common": {
     "name": "growdashboard",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "news": {
+      "0.1.8": {
+        "en": "Version 0.1.8",
+        "de": "Version 0.1.8"
+      },
       "0.1.7": {
         "en": "Version 0.1.7",
         "de": "Version 0.1.7"
@@ -69,7 +73,7 @@
     "connectionType": "local",
     "dataSource": "push",
     "adminUI": {
-      "config": "json"
+      "config": "html"
     },
     "adminTab": {
       "name": "GrowDashboard",
