@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowDashboard</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0d1117;
+            --surface:   #161b22;
+            --border:    #21262d;
+            --border-ho: #30363d;
+            --text:      #e6edf3;
+            --muted:     #6b7280;
+            --green:     #4ade80;
+            --green-dim: #166534;
+            --yellow:    #f59e0b;
+            --red:       #ef4444;
+            --blue:      #60a5fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Header ───────────────────────────────────── */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 100;
+        }
+
+        header svg { flex-shrink: 0; }
+
+        .header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--green);
+            flex: 1;
+        }
+
+        .header-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .conn-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 12px;
+        }
+
+        .conn-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-ho);
+            transition: background 0.4s, box-shadow 0.4s;
+        }
+
+        .conn-dot.on {
+            background: var(--green);
+            box-shadow: 0 0 7px var(--green);
+        }
+
+        /* ── Main layout ──────────────────────────────── */
+        main { padding: 28px; max-width: 1600px; margin: 0 auto; }
+
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--muted);
+            margin-bottom: 14px;
+            margin-top: 32px;
+        }
+
+        .section-title:first-child { margin-top: 0; }
+
+        /* ── Tile grid ────────────────────────────────── */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent, var(--border));
+            border-radius: 14px 14px 0 0;
+        }
+
+        .tile.ok     { --accent: var(--green); border-color: #22c55e44; }
+        .tile.warn   { --accent: var(--yellow); border-color: #f59e0b44; }
+        .tile.danger { --accent: var(--red);   border-color: #ef444444; }
+
+        .tile-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tile-value {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .tile-unit {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--muted);
+            margin-left: 3px;
+        }
+
+        .tile-time {
+            font-size: 0.68rem;
+            color: var(--muted);
+            margin-top: 8px;
+            opacity: 0.7;
+        }
+
+        /* VPD zone pill */
+        .vpd-pill {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 7px;
+        }
+
+        .vpd-low    { background: #1e3a5f; color: #93c5fd; }
+        .vpd-prop   { background: #14532d; color: #86efac; }
+        .vpd-veg    { background: #166534; color: #4ade80; }
+        .vpd-flower { background: #365314; color: #bef264; }
+        .vpd-high   { background: #7f1d1d; color: #fca5a5; }
+
+        /* ── Fan control bar ──────────────────────────── */
+        .fan-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 14px;
+        }
+
+        .fan-bar-label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+        .fan-slider {
+            -webkit-appearance: none;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .fan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--green);
+            cursor: pointer;
+            box-shadow: 0 0 7px rgba(74,222,128,.5);
+        }
+
+        .fan-val {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--green);
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .btn-set {
+            background: var(--green-dim);
+            color: var(--green);
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+            padding: 7px 18px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-set:hover    { background: #14532d; }
+        .btn-set:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Grafana panels ───────────────────────────── */
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 16px;
+        }
+
+        .panel-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            padding: 12px 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-wrap iframe {
+            display: block;
+            width: 100%;
+            border: none;
+            background: #0d1117;
+        }
+
+        /* ── Empty / no-config notice ─────────────────── */
+        .notice {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Vent section grid ────────────────────────── */
+        .vent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a10 10 0 0 1 10 10c0 5-4 9-9 10C7 21 2 16 2 12A10 10 0 0 1 12 2z"/>
+        <path d="M12 12c0-4 2-7 5-9"/>
+        <path d="M12 12c0-4-2-7-5-9"/>
+        <path d="M12 12v9"/>
+    </svg>
+    <div>
+        <div class="header-title">GrowDashboard</div>
+        <div class="header-sub" id="instanceLabel">Verbinde...</div>
+    </div>
+    <div class="conn-badge">
+        <div class="conn-dot" id="connDot"></div>
+        <span id="connText">Offline</span>
+    </div>
+</header>
+
+<main>
+    <!-- Ventilation: always shown when configured -->
+    <div id="ventSection" style="display:none">
+        <div class="section-title">Lueftung &amp; Klima</div>
+        <div class="vent-grid" id="ventGrid"></div>
+        <div id="fanControlWrap" style="display:none">
+            <div class="fan-bar">
+                <span class="fan-bar-label">Luefter Sollwert</span>
+                <input type="range" class="fan-slider" id="fanSlider" min="0" max="100" value="0" step="1">
+                <span class="fan-val"><span id="fanSliderVal">0</span>%</span>
+                <button class="btn-set" id="btnSetFan">Setzen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configurable tiles -->
+    <div id="tilesSection" style="display:none">
+        <div class="section-title">Datenpunkte</div>
+        <div class="tile-grid" id="tileGrid"></div>
+    </div>
+
+    <!-- Grafana panels -->
+    <div id="grafanaSection" style="display:none">
+        <div class="section-title">Grafana</div>
+        <div class="panel-grid" id="panelGrid"></div>
+    </div>
+
+    <div id="emptyNotice" class="notice" style="display:none">
+        Noch keine Datenpunkte oder Panels konfiguriert.<br>
+        Bitte unter <strong>Instanz-Einstellungen &rarr; Dashboard</strong> Kacheln und Grafana-Panels eintragen.
+    </div>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function () {
+'use strict';
+
+// ── Helpers ──────────────────────────────────────────────────
+function calcVPD(t, rh) {
+    const svp = 0.6108 * Math.exp(17.27 * t / (t + 237.3));
+    return +(svp * (1 - rh / 100)).toFixed(2);
+}
+
+function vpdZone(v) {
+    if (v < 0.4) return { label: '< 0.4 Zu feucht',  cls: 'vpd-low' };
+    if (v < 0.8) return { label: '0.4-0.8 Stecklinge', cls: 'vpd-prop' };
+    if (v < 1.2) return { label: '0.8-1.2 Wachstum',   cls: 'vpd-veg' };
+    if (v < 1.6) return { label: '1.2-1.6 Bluete',     cls: 'vpd-flower' };
+    return             { label: '> 1.6 Zu trocken',  cls: 'vpd-high' };
+}
+
+function fmtVal(val, decimals) {
+    if (val === null || val === undefined) return '—';
+    return (+val).toFixed(decimals ?? 1);
+}
+
+function timeAgo(ts) {
+    if (!ts) return '';
+    const s = Math.round((Date.now() - ts) / 1000);
+    if (s < 5)   return 'gerade eben';
+    if (s < 60)  return `vor ${s}s`;
+    if (s < 3600) return `vor ${Math.floor(s/60)}min`;
+    return `vor ${Math.floor(s/3600)}h`;
+}
+
+// ── State ────────────────────────────────────────────────────
+let socket, cfg = {};
+const ventState = { temp: null, hum: null, tempTs: null, humTs: null };
+const tileState = {};   // keyed by stateId
+
+// ── Ventilation tiles ────────────────────────────────────────
+function buildVentGrid() {
+    const grid = document.getElementById('ventGrid');
+    grid.innerHTML = '';
+
+    const defs = [
+        { key: 'temp', id: cfg.ventTempId,    label: 'Temperatur',       unit: '°C', dec: 1, threshMin: cfg.ventTempMin, threshMax: cfg.ventTempMax },
+        { key: 'hum',  id: cfg.ventHumId,     label: 'Luftfeuchtigkeit', unit: '%',  dec: 1, threshMin: cfg.ventHumMin,  threshMax: cfg.ventHumMax },
+        { key: 'vpd',  id: null,              label: 'VPD',              unit: 'kPa',dec: 2 },
+        { key: 'fan',  id: cfg.ventFanReadId, label: 'Luefter (Ist)',    unit: '%',  dec: 0 },
+    ].filter(d => d.id !== undefined);
+
+    defs.forEach(d => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `vent-tile-${d.key}`;
+        tile.innerHTML = `
+            <div class="tile-label">${d.label}</div>
+            <div class="tile-value" id="vent-val-${d.key}">—<span class="tile-unit">${d.unit}</span></div>
+            <div id="vent-extra-${d.key}"></div>
+            <div class="tile-time" id="vent-time-${d.key}"></div>`;
+        grid.appendChild(tile);
+    });
+
+    if (!cfg.ventTempId && !cfg.ventHumId && !cfg.ventFanReadId) {
+        document.getElementById('ventSection').style.display = 'none';
+    } else {
+        document.getElementById('ventSection').style.display = 'block';
+    }
+}
+
+function updateVentTile(key, val, ts, threshMin, threshMax, dec, unit) {
+    const valEl   = document.getElementById(`vent-val-${key}`);
+    const timeEl  = document.getElementById(`vent-time-${key}`);
+    const tileEl  = document.getElementById(`vent-tile-${key}`);
+    if (!valEl) return;
+    valEl.innerHTML = `${fmtVal(val, dec)}<span class="tile-unit">${unit}</span>`;
+    if (timeEl) timeEl.textContent = timeAgo(ts);
+    if (tileEl && val !== null && threshMin !== undefined) {
+        tileEl.className = val < threshMin ? 'tile warn' : val > threshMax ? 'tile danger' : 'tile ok';
+    }
+}
+
+function updateVPD() {
+    const extra = document.getElementById('vent-extra-vpd');
+    if (ventState.temp === null || ventState.hum === null) {
+        updateVentTile('vpd', null, null, undefined, undefined, 2, 'kPa');
+        if (extra) extra.innerHTML = '';
+        return;
+    }
+    const vpd = calcVPD(ventState.temp, ventState.hum);
+    updateVentTile('vpd', vpd, Date.now(), undefined, undefined, 2, 'kPa');
+    const z = vpdZone(vpd);
+    if (extra) extra.innerHTML = `<span class="vpd-pill ${z.cls}">${z.label}</span>`;
+}
+
+// ── Configurable tiles ───────────────────────────────────────
+function buildTiles() {
+    const tiles = (cfg.dashboardTiles || []).filter(t => t.enabled !== false && t.stateId);
+    const grid  = document.getElementById('tileGrid');
+    grid.innerHTML = '';
+    if (!tiles.length) {
+        document.getElementById('tilesSection').style.display = 'none';
+        return;
+    }
+    document.getElementById('tilesSection').style.display = 'block';
+
+    tiles.forEach((t, i) => {
+        tileState[t.stateId] = { val: null, ts: null, cfg: t };
+        const color = t.color || '#4ade80';
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `tile-${i}`;
+        tile.style.setProperty('--accent', color);
+        tile.innerHTML = `
+            <div class="tile-label">${t.label || t.stateId}</div>
+            <div class="tile-value" id="tile-val-${i}">—<span class="tile-unit">${t.unit || ''}</span></div>
+            <div class="tile-time" id="tile-time-${i}"></div>`;
+        grid.appendChild(tile);
+        socket.emit('subscribe', t.stateId);
+        socket.emit('getState', t.stateId, (err, s) => {
+            if (!err && s) onTileState(t.stateId, s);
+        });
+    });
+}
+
+function onTileState(id, s) {
+    if (!s) return;
+    const entry = tileState[id];
+    if (!entry) return;
+    entry.val = s.val;
+    entry.ts  = s.ts;
+    const idx = (cfg.dashboardTiles || []).findIndex(t => t.stateId === id);
+    if (idx < 0) return;
+    const t    = entry.cfg;
+    const valEl  = document.getElementById(`tile-val-${idx}`);
+    const timeEl = document.getElementById(`tile-time-${idx}`);
+    if (valEl) valEl.innerHTML = `${fmtVal(s.val, t.decimals ?? 1)}<span class="tile-unit">${t.unit || ''}</span>`;
+    if (timeEl) timeEl.textContent = timeAgo(s.ts);
+}
+
+// ── Grafana panels ───────────────────────────────────────────
+function buildPanels() {
+    const panels = (cfg.grafanaPanels || []).filter(p => p.enabled !== false && p.url);
+    const grid   = document.getElementById('panelGrid');
+    grid.innerHTML = '';
+    if (!panels.length) {
+        document.getElementById('grafanaSection').style.display = 'none';
+        return;
+    }
+    document.getElementById('grafanaSection').style.display = 'block';
+
+    panels.forEach(p => {
+        const wrap = document.createElement('div');
+        wrap.className = 'panel-wrap';
+        wrap.innerHTML = `
+            <div class="panel-title">${p.title || 'Panel'}</div>
+            <iframe src="${p.url}" height="${p.height || 300}" loading="lazy" allowtransparency="true"></iframe>`;
+        grid.appendChild(wrap);
+    });
+}
+
+// ── Fan control ──────────────────────────────────────────────
+function initFanControl() {
+    if (!cfg.ventFanWriteId) return;
+    document.getElementById('fanControlWrap').style.display = 'block';
+    const slider = document.getElementById('fanSlider');
+    const valEl  = document.getElementById('fanSliderVal');
+    const btn    = document.getElementById('btnSetFan');
+    slider.addEventListener('input', () => { valEl.textContent = slider.value; });
+    btn.addEventListener('click', () => {
+        btn.disabled = true;
+        socket.emit('setState', cfg.ventFanWriteId, { val: +slider.value, ack: false }, () => {
+            btn.disabled = false;
+        });
+    });
+}
+
+// ── Socket events ────────────────────────────────────────────
+function onStateChange(id, s) {
+    if (!s) return;
+    if (id === cfg.ventTempId) {
+        ventState.temp  = s.val; ventState.tempTs = s.ts;
+        updateVentTile('temp', s.val, s.ts, cfg.ventTempMin, cfg.ventTempMax, 1, '°C');
+        updateVPD();
+    } else if (id === cfg.ventHumId) {
+        ventState.hum  = s.val; ventState.humTs = s.ts;
+        updateVentTile('hum', s.val, s.ts, cfg.ventHumMin, cfg.ventHumMax, 1, '%');
+        updateVPD();
+    } else if (id === cfg.ventFanReadId) {
+        updateVentTile('fan', s.val, s.ts, undefined, undefined, 0, '%');
+    }
+    if (tileState[id] !== undefined) onTileState(id, s);
+}
+
+// ── Bootstrap ────────────────────────────────────────────────
+function bootstrap(instance) {
+    document.getElementById('instanceLabel').textContent = instance;
+
+    socket.emit('getObject', `system.adapter.${instance}`, (err, obj) => {
+        if (err || !obj) return;
+        cfg = obj.native || {};
+
+        buildVentGrid();
+
+        // Subscribe vent states
+        [cfg.ventTempId, cfg.ventHumId, cfg.ventFanReadId].filter(Boolean).forEach(id => {
+            socket.emit('subscribe', id);
+            socket.emit('getState', id, (e, s) => { if (!e && s) onStateChange(id, s); });
+        });
+
+        buildTiles();
+        buildPanels();
+        initFanControl();
+
+        // Empty notice
+        const hasSomething = cfg.ventTempId || cfg.ventHumId || cfg.ventFanReadId ||
+            (cfg.dashboardTiles || []).some(t => t.enabled !== false && t.stateId) ||
+            (cfg.grafanaPanels  || []).some(p => p.enabled !== false && p.url);
+        document.getElementById('emptyNotice').style.display = hasSomething ? 'none' : 'block';
+    });
+
+    socket.on('stateChange', onStateChange);
+
+    // Refresh tile timestamps every 30s
+    setInterval(() => {
+        Object.entries(tileState).forEach(([, entry]) => {
+            const idx = (cfg.dashboardTiles || []).findIndex(t => t.stateId === entry.cfg.stateId);
+            if (idx >= 0) {
+                const el = document.getElementById(`tile-time-${idx}`);
+                if (el) el.textContent = timeAgo(entry.ts);
+            }
+        });
+    }, 30000);
+}
+
+function connect() {
+    // Determine instance from URL path: /growdashboard.0/
+    const match = window.location.pathname.match(/\/(growdashboard\.\d+)\//);
+    const instance = match ? match[1] : 'growdashboard.0';
+
+    socket = io('', { path: '/socket.io' });
+
+    socket.on('connect', () => {
+        document.getElementById('connDot').className  = 'conn-dot on';
+        document.getElementById('connText').textContent = 'Verbunden';
+        bootstrap(instance);
+    });
+
+    socket.on('disconnect', () => {
+        document.getElementById('connDot').className  = 'conn-dot';
+        document.getElementById('connText').textContent = 'Getrennt';
+    });
+}
+
+connect();
+})();
+</script>
+</body>
+</html>

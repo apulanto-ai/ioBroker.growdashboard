@@ -22,7 +22,7 @@
     },
     "tab_ventilation": {
       "type": "tab",
-      "label": "Lüftung",
+      "label": "Lueftung",
       "items": {
         "_header_sensors": {
           "type": "header",
@@ -51,7 +51,7 @@
         },
         "ventFanReadId": {
           "type": "objectId",
-          "label": "Lüftergeschwindigkeit (Istwert)",
+          "label": "Lueftergeschwindigkeit (Istwert)",
           "sm": 12,
           "md": 4,
           "filter": {
@@ -66,7 +66,7 @@
         },
         "ventFanWriteId": {
           "type": "objectId",
-          "label": "Lüftersteuerung (Sollwert schreiben)",
+          "label": "Lueftersteuerung (Sollwert schreiben)",
           "sm": 12,
           "md": 6,
           "filter": {
@@ -81,14 +81,14 @@
         },
         "ventTempMin": {
           "type": "number",
-          "label": "Temperatur Min (°C)",
+          "label": "Temperatur Min (C)",
           "sm": 12,
           "md": 3,
           "default": 18
         },
         "ventTempMax": {
           "type": "number",
-          "label": "Temperatur Max (°C)",
+          "label": "Temperatur Max (C)",
           "sm": 12,
           "md": 3,
           "default": 28
@@ -106,6 +106,92 @@
           "sm": 12,
           "md": 3,
           "default": 70
+        }
+      }
+    },
+    "tab_dashboard": {
+      "type": "tab",
+      "label": "Dashboard",
+      "items": {
+        "_header_tiles": {
+          "type": "header",
+          "text": "ioBroker Datenpunkte (Kacheln)",
+          "size": 5
+        },
+        "dashboardTiles": {
+          "type": "table",
+          "label": "Kacheln",
+          "showSecondAddAt": 5,
+          "items": {
+            "stateId": {
+              "type": "objectId",
+              "label": "State ID",
+              "width": "35%",
+              "filter": { "type": "state" }
+            },
+            "label": {
+              "type": "text",
+              "label": "Bezeichnung",
+              "width": "25%"
+            },
+            "unit": {
+              "type": "text",
+              "label": "Einheit",
+              "width": "10%"
+            },
+            "decimals": {
+              "type": "number",
+              "label": "Nachkommastellen",
+              "width": "10%",
+              "default": 1
+            },
+            "color": {
+              "type": "color",
+              "label": "Farbe",
+              "width": "10%"
+            },
+            "enabled": {
+              "type": "checkbox",
+              "label": "Aktiv",
+              "width": "10%",
+              "default": true
+            }
+          }
+        },
+        "_header_grafana": {
+          "type": "header",
+          "text": "Grafana Panels",
+          "size": 5
+        },
+        "grafanaPanels": {
+          "type": "table",
+          "label": "Grafana Panels",
+          "showSecondAddAt": 3,
+          "items": {
+            "url": {
+              "type": "text",
+              "label": "Panel URL (embed)",
+              "width": "50%",
+              "placeholder": "http://grafana:3000/d-solo/..."
+            },
+            "title": {
+              "type": "text",
+              "label": "Titel",
+              "width": "25%"
+            },
+            "height": {
+              "type": "number",
+              "label": "Hoehe (px)",
+              "width": "15%",
+              "default": 300
+            },
+            "enabled": {
+              "type": "checkbox",
+              "label": "Aktiv",
+              "width": "10%",
+              "default": true
+            }
+          }
         }
       }
     }
