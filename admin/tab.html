@@ -265,6 +265,7 @@
     </div>
 </main>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 (function () {
 'use strict';
@@ -434,28 +435,40 @@ function start(sock, instance) {
     sock.on('stateChange', onStateChange);
 }
 
-// ── Wait for parent socket ────────────────────────────────
+// ── Connect ───────────────────────────────────────────────
 function getInstance() {
     var m = window.location.search.match(/[?&]instance=([^&]+)/);
     if (m) return decodeURIComponent(m[1]);
-    m = window.location.pathname.match(/(growdashboard\.\d+)/);
-    return m ? m[1] : 'growdashboard.0';
+    return 'growdashboard.0';
 }
 
-function waitForSocket(n) {
-    var sock = window.parent && window.parent.socket;
-    if (sock && typeof sock.emit === 'function') {
+function connect() {
+    // Admin5: load socket.io directly from admin server
+    if (typeof io !== 'undefined') {
+        var sock = io(window.location.origin, { path: '/socket.io' });
+        sock.on('connect', function () {
+            document.getElementById('connDot').className = 'conn-dot on';
+            document.getElementById('connText').textContent = 'Verbunden';
+            start(sock, getInstance());
+        });
+        sock.on('disconnect', function () {
+            document.getElementById('connDot').className = 'conn-dot';
+            document.getElementById('connText').textContent = 'Getrennt';
+        });
+        return;
+    }
+    // Fallback: older admin via parent socket
+    var parentSock = window.parent && window.parent.socket;
+    if (parentSock && typeof parentSock.emit === 'function') {
         document.getElementById('connDot').className = 'conn-dot on';
         document.getElementById('connText').textContent = 'Verbunden';
-        start(sock, getInstance());
-    } else if (n < 30) {
-        setTimeout(function(){ waitForSocket(n + 1); }, 300);
+        start(parentSock, getInstance());
     } else {
-        document.getElementById('connText').textContent = 'Keine Verbindung';
+        document.getElementById('connText').textContent = 'socket.io nicht gefunden';
     }
 }
 
-waitForSocket(0);
+connect();
 })();
 </script>
 </body>
