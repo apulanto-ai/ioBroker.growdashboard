@@ -1,23 +1,29 @@
-$root    = Split-Path $PSScriptRoot -Parent
-$pkgPath = Join-Path $root 'package.json'
+$root      = Split-Path $PSScriptRoot -Parent
+$pkgPath   = Join-Path $root 'package.json'
 $ioPkgPath = Join-Path $root 'io-package.json'
+$enc       = [System.Text.Encoding]::UTF8
 
-$pkg   = Get-Content $pkgPath   -Raw | ConvertFrom-Json
-$ioPkg = Get-Content $ioPkgPath -Raw | ConvertFrom-Json
-
-$parts    = $pkg.version -split '\.'
+# ── Determine new version from package.json ──────────────
+$pkgText = [System.IO.File]::ReadAllText($pkgPath, $enc)
+$current = [regex]::Match($pkgText, '"version"\s*:\s*"([\d.]+)"').Groups[1].Value
+$parts   = $current -split '\.'
 $parts[2] = [int]$parts[2] + 1
-$newVer   = $parts -join '.'
+$newVer  = $parts -join '.'
 
-$pkg.version          = $newVer
-$ioPkg.common.version = $newVer
+# ── package.json: replace version only ───────────────────
+$pkgText = [regex]::Replace($pkgText, '("version"\s*:\s*")[^"]+(")', "`${1}$newVer`${2}")
+[System.IO.File]::WriteAllText($pkgPath, $pkgText, $enc)
 
-# Prepend new news entry
-$newNews = [ordered]@{ $newVer = @{ en = "Version $newVer"; de = "Version $newVer" } }
-$ioPkg.common.news.PSObject.Properties | ForEach-Object { $newNews[$_.Name] = $_.Value }
-$ioPkg.common.news = [PSCustomObject]$newNews
+# ── io-package.json: replace version + prepend news entry ─
+$ioPkgText = [System.IO.File]::ReadAllText($ioPkgPath, $enc)
 
-$pkg   | ConvertTo-Json -Depth 10 | Set-Content $pkgPath   -Encoding utf8
-$ioPkg | ConvertTo-Json -Depth 10 | Set-Content $ioPkgPath -Encoding utf8
+# Bump version field
+$ioPkgText = [regex]::Replace($ioPkgText, '("version"\s*:\s*")[^"]+(")', "`${1}$newVer`${2}")
 
-Write-Host "version bumped → $newVer"
+# Insert new news entry right after "news": {
+$newsEntry = "      `"$newVer`": {`n        `"en`": `"Version $newVer`",`n        `"de`": `"Version $newVer`"`n      },"
+$ioPkgText = [regex]::Replace($ioPkgText, '("news"\s*:\s*\{)', "`${1}`n$newsEntry")
+
+[System.IO.File]::WriteAllText($ioPkgPath, $ioPkgText, $enc)
+
+Write-Host "version bumped $current → $newVer"

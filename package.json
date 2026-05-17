@@ -1,41 +1,41 @@
 ﻿{
-    "name":  "iobroker.growdashboard",
-    "version":  "0.1.1",
-    "description":  "ioBroker adapter for plant grow computer â€” monitors and visualizes sensor data from Grafana and ioBroker objects",
-    "author":  {
-                   "name":  "apulanto",
-                   "email":  "apulanto@protonmail.com"
-               },
-    "homepage":  "https://github.com/apulanto-ai/ioBroker.growdashboard",
-    "license":  "MIT",
-    "keywords":  [
-                     "ioBroker",
-                     "iobroker",
-                     "adapter",
-                     "grow",
-                     "plants",
-                     "dashboard",
-                     "grafana",
-                     "monitoring"
-                 ],
-    "main":  "main.js",
-    "files":  [
-                  "main.js",
-                  "io-package.json",
-                  "admin/index.html",
-                  "admin/jsonConfig.json"
-              ],
-    "engines":  {
-                    "node":  "\u003e=18"
-                },
-    "scripts":  {
-                    "start":  "node main.js",
-                    "test":  "echo \"No tests configured\" \u0026\u0026 exit 0"
-                },
-    "dependencies":  {
-                         "@iobroker/adapter-core":  "^3.2.3"
-                     },
-    "devDependencies":  {
-                            "@iobroker/testing":  "^5.0.0"
-                        }
+  "name": "iobroker.growdashboard",
+  "version": "0.1.5",
+  "description": "ioBroker adapter for plant grow computer — monitors and visualizes sensor data from Grafana and ioBroker objects",
+  "author": {
+    "name": "apulanto",
+    "email": "apulanto@protonmail.com"
+  },
+  "homepage": "https://github.com/apulanto-ai/ioBroker.growdashboard",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "iobroker",
+    "adapter",
+    "grow",
+    "plants",
+    "dashboard",
+    "grafana",
+    "monitoring"
+  ],
+  "main": "main.js",
+  "files": [
+    "main.js",
+    "io-package.json",
+    "admin/index.html",
+    "admin/jsonConfig.json"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.2.3"
+  },
+  "devDependencies": {
+    "@iobroker/testing": "^5.0.0"
+  }
 }
