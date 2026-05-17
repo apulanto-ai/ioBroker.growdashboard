@@ -1,0 +1,87 @@
+{
+  "common": {
+    "name": "growdashboard",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "Initial release — basic adapter structure",
+        "de": "Erstveröffentlichung — Grundstruktur des Adapters"
+      }
+    },
+    "title": "ioBroker GrowDashboard",
+    "titleLang": {
+      "en": "ioBroker GrowDashboard – Plant Grow Computer",
+      "de": "ioBroker GrowDashboard – Pflanzenwachstums-Computer"
+    },
+    "desc": {
+      "en": "Grow computer adapter for plants. Collects sensor data (temperature, humidity, CO2, VPD, light, EC, pH), computes growing parameters, and visualizes data from Grafana and ioBroker objects.",
+      "de": "Grow-Computer-Adapter für Pflanzen. Erfasst Sensordaten (Temperatur, Luftfeuchtigkeit, CO2, VPD, Licht, EC, pH), berechnet Wachstumsparameter und visualisiert Daten aus Grafana und ioBroker-Objekten."
+    },
+    "authors": [
+      "apulanto <apulanto@protonmail.com>"
+    ],
+    "keywords": [
+      "grow",
+      "plants",
+      "dashboard",
+      "grafana",
+      "monitoring",
+      "vpd",
+      "temperature",
+      "humidity"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "enabled": true,
+    "readme": "https://github.com/apulanto-ai/ioBroker.growdashboard/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "general",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "html"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=4.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.3.3"
+      }
+    ]
+  },
+  "native": {
+    "grafanaUrl": "",
+    "grafanaToken": "",
+    "rooms": []
+  },
+  "objects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": "Connected",
+        "type": "boolean",
+        "role": "indicator.connected",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ],
+  "instanceObjects": []
+}

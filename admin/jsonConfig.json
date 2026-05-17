@@ -1,0 +1,62 @@
+{
+  "type": "tabs",
+  "items": {
+    "tab_general": {
+      "type": "tab",
+      "label": "General",
+      "items": {
+        "grafanaUrl": {
+          "type": "text",
+          "label": "Grafana URL",
+          "placeholder": "http://localhost:3000",
+          "sm": 12,
+          "md": 6
+        },
+        "grafanaToken": {
+          "type": "password",
+          "label": "Grafana API Token",
+          "sm": 12,
+          "md": 6
+        }
+      }
+    },
+    "tab_rooms": {
+      "type": "tab",
+      "label": "Grow Rooms",
+      "items": {
+        "rooms": {
+          "type": "table",
+          "label": "Rooms",
+          "items": {
+            "name": {
+              "type": "text",
+              "label": "Room Name",
+              "width": "20%"
+            },
+            "tempId": {
+              "type": "text",
+              "label": "Temperature State ID",
+              "width": "25%"
+            },
+            "humId": {
+              "type": "text",
+              "label": "Humidity State ID",
+              "width": "25%"
+            },
+            "co2Id": {
+              "type": "text",
+              "label": "CO2 State ID",
+              "width": "25%"
+            },
+            "enabled": {
+              "type": "checkbox",
+              "label": "Active",
+              "width": "5%",
+              "default": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
