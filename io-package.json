@@ -1,178 +1,202 @@
-{
-  "common": {
-    "name": "growdashboard",
-    "version": "0.1.0",
-    "news": {
-      "0.1.0": {
-        "en": "Initial release — basic adapter structure",
-        "de": "Erstveröffentlichung — Grundstruktur des Adapters"
-      }
-    },
-    "title": "ioBroker GrowDashboard",
-    "titleLang": {
-      "en": "ioBroker GrowDashboard – Plant Grow Computer",
-      "de": "ioBroker GrowDashboard – Pflanzenwachstums-Computer"
-    },
-    "desc": {
-      "en": "Grow computer adapter for plants. Monitors ventilation, temperature, humidity and VPD. Visualizes data from Grafana and ioBroker objects.",
-      "de": "Grow-Computer-Adapter für Pflanzen. Überwacht Lüftung, Temperatur, Luftfeuchtigkeit und VPD. Visualisiert Daten aus Grafana und ioBroker-Objekten."
-    },
-    "authors": [
-      "apulanto <apulanto@protonmail.com>"
-    ],
-    "keywords": [
-      "grow",
-      "plants",
-      "dashboard",
-      "grafana",
-      "monitoring",
-      "vpd",
-      "ventilation"
-    ],
-    "license": "MIT",
-    "platform": "Javascript/Node.js",
-    "main": "main.js",
-    "enabled": true,
-    "readme": "https://github.com/apulanto-ai/ioBroker.growdashboard/blob/master/README.md",
-    "loglevel": "info",
-    "mode": "daemon",
-    "type": "general",
-    "compact": true,
-    "connectionType": "local",
-    "dataSource": "push",
-    "adminUI": {
-      "config": "json"
-    },
-    "adminTab": {
-      "name": "GrowDashboard",
-      "fa-icon": "leaf",
-      "singleton": true,
-      "ignoreConfigUpdate": false
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=4.0.0"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=5.3.3"
-      }
-    ]
-  },
-  "native": {
-    "grafanaUrl": "",
-    "grafanaToken": "",
-    "ventTempId": "",
-    "ventHumId": "",
-    "ventFanReadId": "",
-    "ventFanWriteId": "",
-    "ventTempMin": 18,
-    "ventTempMax": 28,
-    "ventHumMin": 50,
-    "ventHumMax": 70
-  },
-  "objects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": { "name": "Information" },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "name": "Connected",
-        "type": "boolean",
-        "role": "indicator.connected",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    },
-    {
-      "_id": "ventilation",
-      "type": "channel",
-      "common": { "name": "Lüftung" },
-      "native": {}
-    }
-  ],
-  "instanceObjects": [
-    {
-      "_id": "ventilation.temperature",
-      "type": "state",
-      "common": {
-        "name": "Temperatur",
-        "type": "number",
-        "role": "value.temperature",
-        "unit": "°C",
-        "read": true,
-        "write": false,
-        "def": null
-      },
-      "native": {}
-    },
-    {
-      "_id": "ventilation.humidity",
-      "type": "state",
-      "common": {
-        "name": "Luftfeuchtigkeit",
-        "type": "number",
-        "role": "value.humidity",
-        "unit": "%",
-        "read": true,
-        "write": false,
-        "def": null
-      },
-      "native": {}
-    },
-    {
-      "_id": "ventilation.vpd",
-      "type": "state",
-      "common": {
-        "name": "VPD (Vapor Pressure Deficit)",
-        "type": "number",
-        "role": "value",
-        "unit": "kPa",
-        "read": true,
-        "write": false,
-        "def": null
-      },
-      "native": {}
-    },
-    {
-      "_id": "ventilation.fanSpeed",
-      "type": "state",
-      "common": {
-        "name": "Lüftergeschwindigkeit (Istwert)",
-        "type": "number",
-        "role": "value",
-        "unit": "%",
-        "min": 0,
-        "max": 100,
-        "read": true,
-        "write": false,
-        "def": null
-      },
-      "native": {}
-    },
-    {
-      "_id": "ventilation.fanControl",
-      "type": "state",
-      "common": {
-        "name": "Lüftersteuerung (Sollwert)",
-        "type": "number",
-        "role": "level",
-        "unit": "%",
-        "min": 0,
-        "max": 100,
-        "read": true,
-        "write": true,
-        "def": 0
-      },
-      "native": {}
-    }
-  ]
+﻿{
+    "common":  {
+                   "name":  "growdashboard",
+                   "version":  "0.1.1",
+                   "news":  {
+                                "0.1.1":  {
+                                              "de":  "Version 0.1.1",
+                                              "en":  "Version 0.1.1"
+                                          },
+                                "0.1.0":  {
+                                              "en":  "Initial release â€” basic adapter structure",
+                                              "de":  "ErstverÃ¶ffentlichung â€” Grundstruktur des Adapters"
+                                          }
+                            },
+                   "title":  "ioBroker GrowDashboard",
+                   "titleLang":  {
+                                     "en":  "ioBroker GrowDashboard â€“ Plant Grow Computer",
+                                     "de":  "ioBroker GrowDashboard â€“ Pflanzenwachstums-Computer"
+                                 },
+                   "desc":  {
+                                "en":  "Grow computer adapter for plants. Monitors ventilation, temperature, humidity and VPD. Visualizes data from Grafana and ioBroker objects.",
+                                "de":  "Grow-Computer-Adapter fÃ¼r Pflanzen. Ãœberwacht LÃ¼ftung, Temperatur, Luftfeuchtigkeit und VPD. Visualisiert Daten aus Grafana und ioBroker-Objekten."
+                            },
+                   "authors":  [
+                                   "apulanto \u003capulanto@protonmail.com\u003e"
+                               ],
+                   "keywords":  [
+                                    "grow",
+                                    "plants",
+                                    "dashboard",
+                                    "grafana",
+                                    "monitoring",
+                                    "vpd",
+                                    "ventilation"
+                                ],
+                   "license":  "MIT",
+                   "platform":  "Javascript/Node.js",
+                   "main":  "main.js",
+                   "enabled":  true,
+                   "readme":  "https://github.com/apulanto-ai/ioBroker.growdashboard/blob/master/README.md",
+                   "loglevel":  "info",
+                   "mode":  "daemon",
+                   "type":  "general",
+                   "compact":  true,
+                   "connectionType":  "local",
+                   "dataSource":  "push",
+                   "adminUI":  {
+                                   "config":  "json"
+                               },
+                   "adminTab":  {
+                                    "name":  "GrowDashboard",
+                                    "fa-icon":  "leaf",
+                                    "singleton":  true,
+                                    "ignoreConfigUpdate":  false
+                                },
+                   "dependencies":  [
+                                        {
+                                            "js-controller":  "\u003e=4.0.0"
+                                        }
+                                    ],
+                   "globalDependencies":  [
+                                              {
+                                                  "admin":  "\u003e=5.3.3"
+                                              }
+                                          ]
+               },
+    "native":  {
+                   "grafanaUrl":  "",
+                   "grafanaToken":  "",
+                   "ventTempId":  "",
+                   "ventHumId":  "",
+                   "ventFanReadId":  "",
+                   "ventFanWriteId":  "",
+                   "ventTempMin":  18,
+                   "ventTempMax":  28,
+                   "ventHumMin":  50,
+                   "ventHumMax":  70
+               },
+    "objects":  [
+                    {
+                        "_id":  "info",
+                        "type":  "channel",
+                        "common":  {
+                                       "name":  "Information"
+                                   },
+                        "native":  {
+
+                                   }
+                    },
+                    {
+                        "_id":  "info.connection",
+                        "type":  "state",
+                        "common":  {
+                                       "name":  "Connected",
+                                       "type":  "boolean",
+                                       "role":  "indicator.connected",
+                                       "read":  true,
+                                       "write":  false,
+                                       "def":  false
+                                   },
+                        "native":  {
+
+                                   }
+                    },
+                    {
+                        "_id":  "ventilation",
+                        "type":  "channel",
+                        "common":  {
+                                       "name":  "LÃ¼ftung"
+                                   },
+                        "native":  {
+
+                                   }
+                    }
+                ],
+    "instanceObjects":  [
+                            {
+                                "_id":  "ventilation.temperature",
+                                "type":  "state",
+                                "common":  {
+                                               "name":  "Temperatur",
+                                               "type":  "number",
+                                               "role":  "value.temperature",
+                                               "unit":  "Â°C",
+                                               "read":  true,
+                                               "write":  false,
+                                               "def":  null
+                                           },
+                                "native":  {
+
+                                           }
+                            },
+                            {
+                                "_id":  "ventilation.humidity",
+                                "type":  "state",
+                                "common":  {
+                                               "name":  "Luftfeuchtigkeit",
+                                               "type":  "number",
+                                               "role":  "value.humidity",
+                                               "unit":  "%",
+                                               "read":  true,
+                                               "write":  false,
+                                               "def":  null
+                                           },
+                                "native":  {
+
+                                           }
+                            },
+                            {
+                                "_id":  "ventilation.vpd",
+                                "type":  "state",
+                                "common":  {
+                                               "name":  "VPD (Vapor Pressure Deficit)",
+                                               "type":  "number",
+                                               "role":  "value",
+                                               "unit":  "kPa",
+                                               "read":  true,
+                                               "write":  false,
+                                               "def":  null
+                                           },
+                                "native":  {
+
+                                           }
+                            },
+                            {
+                                "_id":  "ventilation.fanSpeed",
+                                "type":  "state",
+                                "common":  {
+                                               "name":  "LÃ¼ftergeschwindigkeit (Istwert)",
+                                               "type":  "number",
+                                               "role":  "value",
+                                               "unit":  "%",
+                                               "min":  0,
+                                               "max":  100,
+                                               "read":  true,
+                                               "write":  false,
+                                               "def":  null
+                                           },
+                                "native":  {
+
+                                           }
+                            },
+                            {
+                                "_id":  "ventilation.fanControl",
+                                "type":  "state",
+                                "common":  {
+                                               "name":  "LÃ¼ftersteuerung (Sollwert)",
+                                               "type":  "number",
+                                               "role":  "level",
+                                               "unit":  "%",
+                                               "min":  0,
+                                               "max":  100,
+                                               "read":  true,
+                                               "write":  true,
+                                               "def":  0
+                                           },
+                                "native":  {
+
+                                           }
+                            }
+                        ]
 }
