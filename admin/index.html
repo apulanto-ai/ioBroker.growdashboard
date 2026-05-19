@@ -16,6 +16,111 @@
             padding-bottom: 4px;
             border-bottom: 1px solid #e0e0e0;
         }
+
+        /* Input + Picker-Button nebeneinander */
+        .id-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .id-row .input-field { flex: 1; margin-bottom: 0; }
+        .btn-pick {
+            flex-shrink: 0;
+            height: 36px;
+            padding: 0 12px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            margin-bottom: 14px;
+            transition: background 0.15s;
+        }
+        .btn-pick:hover { background: #c8e6c9; }
+
+        /* Picker Modal */
+        .picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .picker-box {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            width: 560px;
+            max-width: 95vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .picker-header {
+            padding: 14px 18px 10px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .picker-header span { flex: 1; }
+        .picker-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+        .picker-close:hover { color: #333; }
+        .picker-search {
+            margin: 10px 14px 6px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            width: calc(100% - 28px);
+        }
+        .picker-search:focus { border-color: #4caf50; }
+        .picker-count {
+            padding: 2px 14px 6px;
+            font-size: 0.75rem;
+            color: #999;
+        }
+        .picker-list {
+            overflow-y: auto;
+            flex: 1;
+            border-top: 1px solid #f0f0f0;
+        }
+        .picker-item {
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f7f7f7;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .picker-item:hover { background: #e8f5e9; color: #1b5e20; }
+        .picker-loading {
+            padding: 24px;
+            text-align: center;
+            color: #999;
+            font-size: 0.88rem;
+        }
+
+        /* Table */
         .table-wrap { overflow-x: auto; margin-top: 8px; }
         table.config-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
         table.config-table th {
@@ -57,6 +162,8 @@
         }
         .btn-del:hover { color: #b71c1c; }
         .hint { font-size: 0.78rem; color: #888; margin-top: 4px; }
+        .td-pick { white-space: nowrap; }
+        .td-pick .btn-pick { margin-bottom: 0; height: 28px; font-size: 0.75rem; padding: 0 8px; }
     </style>
 </head>
 <body>
@@ -80,35 +187,48 @@
         </div>
     </div>
 
-    <!-- ── Lueftung ───────────────────────────────────── -->
+    <!-- ── Lueftung Sensoren ──────────────────────────── -->
     <div class="section-head">Lueftung – Sensoren</div>
     <div class="row">
         <div class="col s12 m4">
-            <div class="input-field">
-                <input type="text" id="ventTempId" />
-                <label for="ventTempId">Temperatur State-ID</label>
+            <div class="id-row">
+                <div class="input-field">
+                    <input type="text" id="ventTempId" />
+                    <label for="ventTempId">Temperatur State-ID</label>
+                </div>
+                <button class="btn-pick" onclick="openPicker('ventTempId')">&#128269; Auswaehlen</button>
             </div>
         </div>
         <div class="col s12 m4">
-            <div class="input-field">
-                <input type="text" id="ventHumId" />
-                <label for="ventHumId">Luftfeuchtigkeit State-ID</label>
+            <div class="id-row">
+                <div class="input-field">
+                    <input type="text" id="ventHumId" />
+                    <label for="ventHumId">Luftfeuchtigkeit State-ID</label>
+                </div>
+                <button class="btn-pick" onclick="openPicker('ventHumId')">&#128269; Auswaehlen</button>
             </div>
         </div>
         <div class="col s12 m4">
-            <div class="input-field">
-                <input type="text" id="ventFanReadId" />
-                <label for="ventFanReadId">Luefter Istwert State-ID</label>
+            <div class="id-row">
+                <div class="input-field">
+                    <input type="text" id="ventFanReadId" />
+                    <label for="ventFanReadId">Luefter Istwert State-ID</label>
+                </div>
+                <button class="btn-pick" onclick="openPicker('ventFanReadId')">&#128269; Auswaehlen</button>
             </div>
         </div>
     </div>
 
+    <!-- ── Lueftung Steuerung ─────────────────────────── -->
     <div class="section-head">Lueftung – Steuerung &amp; Schwellenwerte</div>
     <div class="row">
         <div class="col s12 m6">
-            <div class="input-field">
-                <input type="text" id="ventFanWriteId" />
-                <label for="ventFanWriteId">Luefter Sollwert State-ID (schreiben)</label>
+            <div class="id-row">
+                <div class="input-field">
+                    <input type="text" id="ventFanWriteId" />
+                    <label for="ventFanWriteId">Luefter Sollwert State-ID (schreiben)</label>
+                </div>
+                <button class="btn-pick" onclick="openPicker('ventFanWriteId')">&#128269; Auswaehlen</button>
             </div>
         </div>
     </div>
@@ -146,12 +266,13 @@
         <table class="config-table" id="tilesTable">
             <thead>
                 <tr>
-                    <th style="width:38%">State-ID</th>
-                    <th style="width:25%">Bezeichnung</th>
-                    <th style="width:12%">Einheit</th>
-                    <th style="width:10%">Stellen</th>
-                    <th style="width:8%">Aktiv</th>
-                    <th style="width:7%"></th>
+                    <th style="width:34%">State-ID</th>
+                    <th style="width:4%"></th>
+                    <th style="width:22%">Bezeichnung</th>
+                    <th style="width:10%">Einheit</th>
+                    <th style="width:9%">Stellen</th>
+                    <th style="width:7%">Aktiv</th>
+                    <th style="width:6%"></th>
                 </tr>
             </thead>
             <tbody id="tilesBody"></tbody>
@@ -181,19 +302,124 @@
 </div>
 
 <script>
+// ── Objekt-Picker ──────────────────────────────────────────
+var stateCache = null;
+
+function openPicker(targetInputId, onSelect) {
+    var sock = window.parent && window.parent.socket;
+    if (!sock) { alert('Socket nicht verfuegbar'); return; }
+
+    function showModal(ids) {
+        var overlay = document.createElement('div');
+        overlay.className = 'picker-overlay';
+        overlay.innerHTML =
+            '<div class="picker-box">' +
+                '<div class="picker-header">' +
+                    '<span>Objekt auswaehlen</span>' +
+                    '<button class="picker-close">&times;</button>' +
+                '</div>' +
+                '<input class="picker-search" placeholder="Suchen... (z.B. hm-rpc, temperature)" autofocus />' +
+                '<div class="picker-count" id="pickerCount">' + ids.length + ' Objekte</div>' +
+                '<div class="picker-list" id="pickerList"></div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        var search  = overlay.querySelector('.picker-search');
+        var list    = overlay.querySelector('.picker-list');
+        var countEl = overlay.querySelector('#pickerCount');
+
+        function render(filter) {
+            var q = filter.toLowerCase();
+            var filtered = q ? ids.filter(function(id){ return id.toLowerCase().indexOf(q) !== -1; }) : ids;
+            countEl.textContent = filtered.length + ' Objekte';
+            list.innerHTML = filtered.slice(0, 300).map(function(id) {
+                return '<div class="picker-item">' + id + '</div>';
+            }).join('');
+        }
+
+        render('');
+        setTimeout(function(){ search.focus(); }, 50);
+
+        search.addEventListener('input', function(){ render(this.value); });
+
+        list.addEventListener('click', function(e) {
+            var item = e.target.closest('.picker-item');
+            if (!item) return;
+            var id = item.textContent;
+            if (onSelect) {
+                onSelect(id);
+            } else {
+                var el = document.getElementById(targetInputId);
+                if (el) {
+                    el.value = id;
+                    // Trigger Materialize label update + onChange
+                    el.dispatchEvent(new Event('change'));
+                    if (typeof M !== 'undefined') M.updateTextFields();
+                }
+            }
+            overlay.remove();
+        });
+
+        overlay.querySelector('.picker-close').addEventListener('click', function(){ overlay.remove(); });
+        overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.remove(); });
+        document.addEventListener('keydown', function esc(e) {
+            if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+        });
+    }
+
+    if (stateCache) { showModal(stateCache); return; }
+
+    // Lade-Overlay anzeigen
+    var loadOverlay = document.createElement('div');
+    loadOverlay.className = 'picker-overlay';
+    loadOverlay.innerHTML = '<div class="picker-box"><div class="picker-loading">Lade Objekte...</div></div>';
+    document.body.appendChild(loadOverlay);
+
+    function gotObjects(err, res) {
+        loadOverlay.remove();
+        if (err) { alert('Fehler beim Laden: ' + err); return; }
+        var ids = [];
+        if (res && res.rows) {
+            ids = res.rows.map(function(r){ return r.id; });
+        } else if (res && typeof res === 'object' && !Array.isArray(res)) {
+            ids = Object.keys(res);
+        }
+        ids.sort();
+        stateCache = ids;
+        showModal(ids);
+    }
+
+    // Versuche verschiedene Admin-API-Methoden
+    if (typeof sock.getObjectView === 'function') {
+        sock.getObjectView('system', 'state', { startkey: '', endkey: '香' }, gotObjects);
+    } else if (typeof sock.getForeignObjects === 'function') {
+        sock.getForeignObjects('*', 'state', gotObjects);
+    } else if (typeof sock.emit === 'function') {
+        sock.emit('getObjectView', 'system', 'state', { startkey: '', endkey: '香' }, gotObjects);
+    } else {
+        loadOverlay.remove();
+        alert('Keine geeignete API verfuegbar');
+    }
+}
+
 // ── Row builders ──────────────────────────────────────────
 function tileRow(t) {
     t = t || {};
     var tr = document.createElement('tr');
     tr.innerHTML =
         '<td><input type="text" class="t-stateId" value="' + esc(t.stateId) + '" placeholder="hm-rpc.0.ABC.TEMP" /></td>' +
+        '<td class="td-pick"><button class="btn-pick" title="Auswaehlen">&#128269;</button></td>' +
         '<td><input type="text" class="t-label"   value="' + esc(t.label)   + '" placeholder="Temperatur" /></td>' +
         '<td><input type="text" class="t-unit"    value="' + esc(t.unit)    + '" placeholder="°C" /></td>' +
         '<td><input type="number" class="t-dec"   value="' + (t.decimals !== undefined ? t.decimals : 1) + '" min="0" max="4" /></td>' +
         '<td><input type="checkbox" class="t-en" ' + (t.enabled !== false ? 'checked' : '') + ' /></td>' +
-        '<td><button class="btn-del" title="Zeile loeschen">&times;</button></td>';
-    tr.querySelector('.btn-del').addEventListener('click', function () { tr.remove(); onChange(); });
-    tr.querySelectorAll('input').forEach(function (el) { el.addEventListener('change', onChange); });
+        '<td><button class="btn-del" title="Loeschen">&times;</button></td>';
+    var input = tr.querySelector('.t-stateId');
+    tr.querySelector('.btn-pick').addEventListener('click', function() {
+        openPicker(null, function(id){ input.value = id; input.dispatchEvent(new Event('change')); });
+    });
+    tr.querySelector('.btn-del').addEventListener('click', function(){ tr.remove(); onChange(); });
+    tr.querySelectorAll('input').forEach(function(el){ el.addEventListener('change', onChange); });
     return tr;
 }
 
@@ -201,13 +427,13 @@ function panelRow(p) {
     p = p || {};
     var tr = document.createElement('tr');
     tr.innerHTML =
-        '<td><input type="text" class="p-url"    value="' + esc(p.url)    + '" placeholder="http://grafana:3000/d-solo/..." /></td>' +
-        '<td><input type="text" class="p-title"  value="' + esc(p.title)  + '" placeholder="Temperaturverlauf" /></td>' +
-        '<td><input type="number" class="p-h"    value="' + (p.height || 300) + '" min="100" max="1200" /></td>' +
+        '<td><input type="text" class="p-url"   value="' + esc(p.url)   + '" placeholder="http://grafana:3000/d-solo/..." /></td>' +
+        '<td><input type="text" class="p-title" value="' + esc(p.title) + '" placeholder="Temperaturverlauf" /></td>' +
+        '<td><input type="number" class="p-h"   value="' + (p.height || 300) + '" min="100" max="1200" /></td>' +
         '<td><input type="checkbox" class="p-en" ' + (p.enabled !== false ? 'checked' : '') + ' /></td>' +
-        '<td><button class="btn-del" title="Zeile loeschen">&times;</button></td>';
-    tr.querySelector('.btn-del').addEventListener('click', function () { tr.remove(); onChange(); });
-    tr.querySelectorAll('input').forEach(function (el) { el.addEventListener('change', onChange); });
+        '<td><button class="btn-del" title="Loeschen">&times;</button></td>';
+    tr.querySelector('.btn-del').addEventListener('click', function(){ tr.remove(); onChange(); });
+    tr.querySelectorAll('input').forEach(function(el){ el.addEventListener('change', onChange); });
     return tr;
 }
 
@@ -218,47 +444,44 @@ function load(settings, onChange_cb) {
     onChange = onChange_cb;
     if (!settings) return;
 
-    // Simple fields
     var simpleIds = ['grafanaUrl','grafanaToken','ventTempId','ventHumId','ventFanReadId','ventFanWriteId',
                      'ventTempMin','ventTempMax','ventHumMin','ventHumMax'];
-    simpleIds.forEach(function (id) {
+    simpleIds.forEach(function(id) {
         var el = document.getElementById(id);
         if (!el) return;
         el.value = settings[id] !== undefined ? settings[id] : '';
-        M.updateTextFields();
         el.addEventListener('change', onChange_cb);
     });
+    if (typeof M !== 'undefined') M.updateTextFields();
 
-    // Tiles table
     var tilesBody = document.getElementById('tilesBody');
     tilesBody.innerHTML = '';
-    (settings.dashboardTiles || []).forEach(function (t) { tilesBody.appendChild(tileRow(t)); });
+    (settings.dashboardTiles || []).forEach(function(t){ tilesBody.appendChild(tileRow(t)); });
 
-    // Panels table
     var panelsBody = document.getElementById('panelsBody');
     panelsBody.innerHTML = '';
-    (settings.grafanaPanels || []).forEach(function (p) { panelsBody.appendChild(panelRow(p)); });
+    (settings.grafanaPanels || []).forEach(function(p){ panelsBody.appendChild(panelRow(p)); });
 
     onChange_cb(false);
 }
 
 function save(callback) {
     var result = {
-        grafanaUrl:    document.getElementById('grafanaUrl').value.trim(),
-        grafanaToken:  document.getElementById('grafanaToken').value,
-        ventTempId:    document.getElementById('ventTempId').value.trim(),
-        ventHumId:     document.getElementById('ventHumId').value.trim(),
-        ventFanReadId: document.getElementById('ventFanReadId').value.trim(),
-        ventFanWriteId:document.getElementById('ventFanWriteId').value.trim(),
-        ventTempMin:   parseFloat(document.getElementById('ventTempMin').value) || 18,
-        ventTempMax:   parseFloat(document.getElementById('ventTempMax').value) || 28,
-        ventHumMin:    parseFloat(document.getElementById('ventHumMin').value) || 50,
-        ventHumMax:    parseFloat(document.getElementById('ventHumMax').value) || 70,
+        grafanaUrl:     document.getElementById('grafanaUrl').value.trim(),
+        grafanaToken:   document.getElementById('grafanaToken').value,
+        ventTempId:     document.getElementById('ventTempId').value.trim(),
+        ventHumId:      document.getElementById('ventHumId').value.trim(),
+        ventFanReadId:  document.getElementById('ventFanReadId').value.trim(),
+        ventFanWriteId: document.getElementById('ventFanWriteId').value.trim(),
+        ventTempMin:    parseFloat(document.getElementById('ventTempMin').value) || 18,
+        ventTempMax:    parseFloat(document.getElementById('ventTempMax').value) || 28,
+        ventHumMin:     parseFloat(document.getElementById('ventHumMin').value) || 50,
+        ventHumMax:     parseFloat(document.getElementById('ventHumMax').value) || 70,
         dashboardTiles: [],
         grafanaPanels:  []
     };
 
-    document.querySelectorAll('#tilesBody tr').forEach(function (tr) {
+    document.querySelectorAll('#tilesBody tr').forEach(function(tr) {
         var stateId = tr.querySelector('.t-stateId').value.trim();
         if (!stateId) return;
         result.dashboardTiles.push({
@@ -270,7 +493,7 @@ function save(callback) {
         });
     });
 
-    document.querySelectorAll('#panelsBody tr').forEach(function (tr) {
+    document.querySelectorAll('#panelsBody tr').forEach(function(tr) {
         var url = tr.querySelector('.p-url').value.trim();
         if (!url) return;
         result.grafanaPanels.push({
@@ -285,14 +508,14 @@ function save(callback) {
 }
 
 // ── Add-row buttons ───────────────────────────────────────
-var onChange = function () {};
+var onChange = function(){};
 
-document.getElementById('btnAddTile').addEventListener('click', function () {
+document.getElementById('btnAddTile').addEventListener('click', function(){
     document.getElementById('tilesBody').appendChild(tileRow());
     onChange();
 });
 
-document.getElementById('btnAddPanel').addEventListener('click', function () {
+document.getElementById('btnAddPanel').addEventListener('click', function(){
     document.getElementById('panelsBody').appendChild(panelRow());
     onChange();
 });
