@@ -1,6 +1,6 @@
 ﻿{
   "name": "iobroker.growdashboard",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "ioBroker adapter for plant grow computer — monitors and visualizes sensor data from Grafana and ioBroker objects",
   "author": {
     "name": "apulanto",

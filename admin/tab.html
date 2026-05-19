@@ -452,29 +452,42 @@ function start(instance) {
 // ── Wait for Admin5 parent socket ──────────────────────────
 function getInstance() {
     var m = window.location.search.match(/[?&]instance=([^&]+)/);
-    return m ? decodeURIComponent(m[1]) : 'growdashboard.0';
+    var inst = m ? decodeURIComponent(m[1]) : '0';
+    // URL may pass just "0"; ensure full "growdashboard.0" form
+    if (/^\d+$/.test(inst)) return 'growdashboard.' + inst;
+    return inst;
+}
+
+function onConnected(sock) {
+    S = sock;
+    document.getElementById('connDot').className = 'conn-dot on';
+    document.getElementById('connText').textContent = 'Verbunden';
+    start(getInstance());
 }
 
 function tryConnect(n) {
     var sock = window.parent && window.parent.socket;
     if (!sock) {
-        if (n < 50) { setTimeout(function(){ tryConnect(n+1); }, 200); }
+        if (n < 150) { setTimeout(function(){ tryConnect(n+1); }, 200); }
         else { document.getElementById('connText').textContent = 'Kein Socket'; }
         return;
     }
 
-    // Check connected state (Admin5 Connection class)
-    var ready = false;
-    if (typeof sock.isConnected === 'function') ready = sock.isConnected();
-    else if (typeof sock.connected === 'boolean') ready = sock.connected;
-    else if (typeof sock.getObject === 'function') ready = true; // has API = assume ready
+    // Modern Admin5: waitForFirstConnection() resolves immediately if already connected
+    if (typeof sock.waitForFirstConnection === 'function') {
+        sock.waitForFirstConnection()
+            .then(function(){ onConnected(sock); })
+            .catch(function(){ document.getElementById('connText').textContent = 'Verbindungsfehler'; });
+        return;
+    }
+
+    // Legacy: poll isConnected (do NOT treat getObject presence as "connected")
+    var ready = (typeof sock.isConnected === 'function') ? sock.isConnected()
+              : (sock.connected === true);
 
     if (ready) {
-        S = sock;
-        document.getElementById('connDot').className = 'conn-dot on';
-        document.getElementById('connText').textContent = 'Verbunden';
-        start(getInstance());
-    } else if (n < 50) {
+        onConnected(sock);
+    } else if (n < 100) {
         setTimeout(function(){ tryConnect(n+1); }, 200);
     } else {
         document.getElementById('connText').textContent = 'Keine Verbindung';
