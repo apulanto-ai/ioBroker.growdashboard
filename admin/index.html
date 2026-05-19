@@ -306,7 +306,8 @@
 var stateCache = null;
 
 function openPicker(targetInputId, onSelect) {
-    var sock = window.parent && window.parent.socket;
+    // adapter-settings.js exposes window.socket; Admin5 tab uses window.parent.socket
+    var sock = (window.parent && window.parent.socket) || window.socket;
     if (!sock) { alert('Socket nicht verfuegbar'); return; }
 
     function showModal(ids) {
